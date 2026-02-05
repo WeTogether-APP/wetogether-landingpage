@@ -21,8 +21,13 @@ export const metadata: Metadata = {
   title: "WeTogether - Travel Together",
   description: "Real-time group navigation for coordinated travel. Travel together, stay connected.",
   icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
+    icon: [
+      { url: '/logo.png', sizes: 'any' },
+    ],
+    apple: [
+      { url: '/logo.png', sizes: '180x180' },
+    ],
+    shortcut: '/logo.png',
   },
 };
 
