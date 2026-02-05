@@ -20,25 +20,25 @@ export default function WaitlistPage() {
     setStatus('loading');
     setMessage('');
 
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-
     try {
-      // Submit to Netlify Forms
-      const response = await fetch('/', {
+      // Submit to our API route which handles Netlify Forms
+      const response = await fetch('/api/waitlist', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(Array.from(formData.entries()) as [string, string][]).toString(),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
       });
+
+      const data = await response.json();
 
       if (response.ok) {
         setStatus('success');
         setMessage('Thank you! We\'ll notify you when we launch.');
         setEmail('');
-        form.reset();
       } else {
         setStatus('error');
-        setMessage('Something went wrong. Please try again.');
+        setMessage(data.error || 'Something went wrong. Please try again.');
       }
     } catch {
       setStatus('error');
@@ -102,19 +102,12 @@ export default function WaitlistPage() {
 
                 {/* Email Form */}
                 <form 
-                  name="waitlist" 
-                  method="POST" 
-                  data-netlify="true"
-                  netlify-honeypot="bot-field"
                   onSubmit={handleSubmit} 
                   className="max-w-lg mx-auto lg:mx-0 space-y-4 pt-4"
                 >
-                  <input type="hidden" name="form-name" value="waitlist" />
-                  <input type="hidden" name="bot-field" />
                   <div className="flex flex-col sm:flex-row gap-3">
                     <input
                       type="email"
-                      name="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email"
@@ -327,19 +320,12 @@ export default function WaitlistPage() {
             
             <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 md:p-10 shadow-xl border border-gray-100 max-w-2xl mx-auto">
               <form 
-                name="waitlist" 
-                method="POST" 
-                data-netlify="true"
-                netlify-honeypot="bot-field"
                 onSubmit={handleSubmit} 
                 className="space-y-5"
               >
-                <input type="hidden" name="form-name" value="waitlist" />
-                <input type="hidden" name="bot-field" />
                 <div className="flex flex-col sm:flex-row gap-3">
                   <input
                     type="email"
-                    name="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
