@@ -8,7 +8,7 @@ export default function WaitlistPage() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (!email || !email.includes('@')) {
@@ -20,24 +20,25 @@ export default function WaitlistPage() {
     setStatus('loading');
     setMessage('');
 
-    try {
-      const response = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+    const form = e.currentTarget;
+    const formData = new FormData(form);
 
-      const data = await response.json();
+    try {
+      // Submit to Netlify Forms
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(Array.from(formData.entries()) as [string, string][]).toString(),
+      });
 
       if (response.ok) {
         setStatus('success');
         setMessage('Thank you! We\'ll notify you when we launch.');
         setEmail('');
+        form.reset();
       } else {
         setStatus('error');
-        setMessage(data.error || 'Something went wrong. Please try again.');
+        setMessage('Something went wrong. Please try again.');
       }
     } catch {
       setStatus('error');
@@ -100,15 +101,26 @@ export default function WaitlistPage() {
                 </div>
 
                 {/* Email Form */}
-                <form onSubmit={handleSubmit} className="max-w-lg mx-auto lg:mx-0 space-y-4 pt-4">
+                <form 
+                  name="waitlist" 
+                  method="POST" 
+                  data-netlify="true"
+                  netlify-honeypot="bot-field"
+                  onSubmit={handleSubmit} 
+                  className="max-w-lg mx-auto lg:mx-0 space-y-4 pt-4"
+                >
+                  <input type="hidden" name="form-name" value="waitlist" />
+                  <input type="hidden" name="bot-field" />
                   <div className="flex flex-col sm:flex-row gap-3">
                     <input
                       type="email"
+                      name="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email"
                       className="flex-1 px-5 py-4 bg-white border-2 border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 rounded-xl transition-all text-base shadow-sm hover:border-gray-300"
                       disabled={status === 'loading'}
+                      required
                     />
                     <button
                       type="submit"
@@ -314,15 +326,26 @@ export default function WaitlistPage() {
             </div>
             
             <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 md:p-10 shadow-xl border border-gray-100 max-w-2xl mx-auto">
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form 
+                name="waitlist" 
+                method="POST" 
+                data-netlify="true"
+                netlify-honeypot="bot-field"
+                onSubmit={handleSubmit} 
+                className="space-y-5"
+              >
+                <input type="hidden" name="form-name" value="waitlist" />
+                <input type="hidden" name="bot-field" />
                 <div className="flex flex-col sm:flex-row gap-3">
                   <input
                     type="email"
+                    name="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
                     className="flex-1 px-6 py-4 bg-white border-2 border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 rounded-xl transition-all text-base shadow-sm hover:border-gray-300"
                     disabled={status === 'loading'}
+                    required
                   />
                   <button
                     type="submit"
